@@ -6,6 +6,8 @@ RUN ["apt-get", "update"]
 RUN ["apt-get", "install", "-y", "vim"]
 RUN ["apt-get", "update"]
 RUN ["apt-get", "install", "-y", "ffmpeg"]
+RUN ["apt-get", "install", "-y", "libsm6"]
+RUN ["apt-get", "install", "-y", "libxext6"]
 
 # Add requirement.txt first for caching purposes.
 COPY requirements.txt /app
