@@ -1,41 +1,50 @@
 # Carla RL Project
+Forked from carla-rl-gym/carla-rl, this repo is currently being worked on as an Insight Data Science project (20A.AI). The goal is to reproduce results by seansegal and analyze the difference between the implemented algorithms. Furthermore, REINFORCE (vanilla policy gradient) and SAC (soft actor-critic) may be added to the list.
 
 ## Installation and Setup
 
 ### Running the CARLA Server
-Our program uses the CARLA simulator as the environment. The easiest way to install CARLA is to use the Docker container by running,
+Install CARLA using the Docker container by running,
 `docker pull carlasim/carla:0.8.2`
 
-We change the default settings (the timeout) when running the server and therefore we have our own `carla-server` docker image that builds on this image. You can build it by running
+Build modified CARLA server using Docker by running,
 `docker build server -t carla-server`.
 
-Next, you can run the server Docker container with
+Next, run Docker container with,
 `nvidia-docker run --rm -it -p 2000-2002:2000-2002 carlasim/carla:0.8.2 /bin/bash`
+(This will require GPU and updated graphics driver)
 
-Note that this requires `nvidia-docker` to be installed on your machine (which means you will also need a GPU). Finally, inside the docker container you can
-run the server with
+Inside the Docker container, run server with,
 `./CarlaUE4.sh /Game/Maps/Town01 -carla-server -benchmark -fps=15 -windowed -ResX=800 -ResY=600 `
 
-However, since we often require running more than 1 server, we recommend using the script `server/run_servers.py` to run the CARLA server. You can run N servers by running (the logs for stdout and stderr will be under `server_output` folder):
+For multiple servers instances, it is recommended to use script `server/run_servers.py`. Start N servers by running,
 `python server/run_servers.py  --num-servers N`
-In order to see the servers output `docker logs -ft CONTAINER_ID` follows and tails it.
+(You will need GPU ids)
+The logs for stdout and stderr will be under `server_output` folder
+
+Servers output `docker logs -ft CONTAINER_ID` follows and tails it.
 
 ### Running the client (training code, benchmark code)
-Our code requires:
+Code requires:
 * Python 3
 * PyTorch
-* OpenAI Gym
+* OpenAI Gym (v 0.10.8)
 * OpenAI Baselines
 
-We suggest that you use our own Dockerfile to install all these dependencies. You can build our client Dockerfile with,
+Build modified CARLA client using Dockerfile with,
 `docker build client -t carla-client`
-then you can run
+
+Then run,
 `nvidia-docker run -it --network=host -v $PWD:/app carla-client /bin/bash`
-The `--network=host` flag allows the Docker container to make requests to the server. Once you are inside
-the container, you can run any of our scripts like `python client/train.py --config client/config/base.yaml`.
+(`--network=host` flag allows the Docker container to make requests to the server)
+
+Inside the Docker container, run scripts using for example,
+`python client/train.py --config client/config/base.yaml`
+
+Resume training by using the `--resume-training` flag instead
 
 ### Arguments and Config Files
-Our `client/train.py` script uses both arguments and a configuration file. The configuration file specifies all components of the model. The config file should have everything necessary to reproduce the results of a given model. The arguments of the script deal with things that are independent of the model (this includes things, like for example, how often to create videos or log to Tensorboard)
+`client/train.py` script uses both arguments and a configuration file. The configuration file specifies all components of the model. The config file should have everything necessary to reproduce the results of a given model. The arguments of the script deal with things that are independent of the model (for example, how often to create videos or log to Tensorboard)
 
 
 ### Hyperparameter Tuning
@@ -44,17 +53,17 @@ To test a set of hyperparemeters see the `scripts/test_hyperparameters_parallel.
 ## Benchmark Results
 
 ### A2C
-To reproduce our results, run a CARLA server and inside the `carla-client` docker run,
+To reproduce seansegal's results, run a CARLA server and inside the `carla-client` docker run,
 `python client/train.py --config client/config/a2c.yaml`
 
 ### ACKTR
-To reproduce our results, run a CARLA server and inside the `carla-client` docker run,
+To reproduce seasegal's results, run a CARLA server and inside the `carla-client` docker run,
 `python client/train.py --config client/config/acktr.yaml`
 
 ### PPO
-To reproduce our results, run a CARLA server and inside the `carla-client` docker run,
+To reproduce seansegal's results, run a CARLA server and inside the `carla-client` docker run,
 `python client/train.py --config client/config/ppo.yaml`
 
 ### On-Policy HER
-To reproduce our results, run a CARLA server and inside the `carla-client` docker run,
+To reproduce seansegal's results, run a CARLA server and inside the `carla-client` docker run,
 `python client/train.py --config client/config/her.yaml`
