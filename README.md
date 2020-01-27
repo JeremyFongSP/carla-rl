@@ -5,17 +5,7 @@ Forked from [carla-rl-gym/carla-rl](https://github.com/carla-rl-gym/carla-rl), t
 ## Ubuntu Installation and Setup
 The Carla simulator requires 2 running processes: Server and Client. The server generates the specifics of the map. The client runs the algorithms and training process.
 
-### Running the CARLA Server
-Install CARLA using the Docker container by running,
-```
-docker pull carlasim/carla:0.8.2
-```
-
-Build modified CARLA server using Docker by running,
-```
-docker build server -t carla-server
-```
-
+### Update nvidia-docker
 To use the nvidia-docker, the machine requires a GPU and updated graphics driver.
 To update Nvidia drivers use,
 ```
@@ -28,6 +18,20 @@ Take note of the available drivers then run,
 sudo apt install nvidia-driver-DRIVER_NUMBER
 ```
 
+### CARLA SERVER
+
+#### Build Server
+Install CARLA using the Docker container by running,
+```
+docker pull carlasim/carla:0.8.2
+```
+
+Build modified CARLA server using Docker by running,
+```
+docker build server -t carla-server
+```
+
+#### Running CARLA server
 Next, run Docker container with,
 ```
 nvidia-docker run --rm -it -p 2000-2002:2000-2002 carlasim/carla:0.8.2 /bin/bash
@@ -51,7 +55,9 @@ The logs for stdout and stderr will be under `server_output` folder
 
 Servers output `docker logs -ft CONTAINER_ID` follows and tails it.
 
-### Running the client (training code, benchmark code)
+### CLIENT
+
+#### Build Client
 Code requires:
 * Python 3
 * PyTorch
@@ -63,7 +69,8 @@ Build modified CARLA client using Dockerfile with,
 docker build client -t carla-client
 ```
 
-Then run,
+#### Running CARLA client (training code, benchmark code)
+To run the client,
 ```
 nvidia-docker run -it --network=host -v $PWD:/app carla-client /bin/bash
 ```
@@ -75,10 +82,10 @@ python client/train.py --config client/config/base.yaml
 ```
 (Resume training by using the `--resume-training MODEL_FILE.pth.tar` flag instead)
 
-### Arguments and Config Files
+#### Arguments and Config Files
 `client/train.py` script uses both arguments and a configuration file. The configuration file specifies all components of the model. The config file should have everything necessary to reproduce the results of a given model. The arguments of the script deal with things that are independent of the model (for example, how often to create videos or log to Tensorboard)
 
-### Hyperparameter Tuning
+#### Hyperparameter Tuning
 To test a set of hyperparemeters see the `scripts/test_hyperparameters_parallel.py` script. This will let you specify a set of hyperparameters to test different from those specified in the `client/config/base.yaml` file.
 
 
