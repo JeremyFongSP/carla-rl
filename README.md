@@ -5,7 +5,7 @@ Forked from [carla-rl-gym/carla-rl](https://github.com/carla-rl-gym/carla-rl), t
 ## Ubuntu Installation and Setup
 The Carla simulator requires 2 running processes: Server and Client. The server generates the specifics of the map. The client runs the algorithms and training process.
 
-### Update nvidia-docker
+### Update Nvidia Drivers
 To use the nvidia-docker, the machine requires a GPU and updated graphics driver.
 To update Nvidia drivers use,
 ```
