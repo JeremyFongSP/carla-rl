@@ -1,4 +1,4 @@
-agent: reinforce
+agent: vpg
 num_updates: 100000
 lr: 0.0007 # Learning rate
 eps: 0.00001 # RMSprop optimizer epsilon

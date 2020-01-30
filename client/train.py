@@ -120,13 +120,14 @@ def main():
     if config.agent == 'forward':
         agent = agents.ForwardCarla()
 
-    if config.agent == 'reinforce':
-        agent = agents.A2CCarla(obs_converter,
+    if config.agent == 'vpg':
+        agent = agents.VPGCarla(obs_converter,
                                 action_converter,
                                 config.value_loss_coef,
                                 config.entropy_coef,
                                 lr=config.lr,
                                 eps=config.eps, alpha=config.alpha,
+                                gamma=config.gamma,
                                 max_grad_norm=config.max_grad_norm)
 
     if config.agent == 'a2c':
