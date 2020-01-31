@@ -12,10 +12,9 @@ class VPGCarla(Agent):
     def __init__(self,
                  obs_converter,
                  action_converter,
-                 ppo_epoch,
-                 num_mini_batch,
                  value_loss_coef,
                  entropy_coef,
+                 alpha=None,
                  lr=None,
                  eps=None,
                  gamma=None,
@@ -25,10 +24,6 @@ class VPGCarla(Agent):
         self.action_converter = action_converter
         self.model = Policy(self.obs_converter.get_observation_space(), 
                             self.action_converter.get_action_space()).to("cuda:0")
-
-        self.ppo_epoch = ppo_epoch
-        self.num_mini_batch = num_mini_batch
-
         self.value_loss_coef = value_loss_coef
         self.entropy_coef = entropy_coef
 
@@ -38,65 +33,47 @@ class VPGCarla(Agent):
 
 
     def update(self, rollouts):
-        advantages = rollouts.returns[:-1] - rollouts.value_preds[:-1]
+        # 4: Compute rewards to go Rt
+        returns = rollouts.returns[:-1]
+
+        # 5: Compute advantage estimates At based on current value
+        # function Vk
+        advantages = returns - rollouts.value_preds[:-1]
         advantages = (advantages - advantages.mean()) / (
             advantages.std() + 1e-5)
 
-        value_loss_epoch = 0
-        action_loss_epoch = 0
-        dist_entropy_epoch = 0
+        # Update Epsilon Greedy
+        # self.eps_curr = max(0.0, self.eps_curr - self.eps_greedy_decay)
+        obs_shape = {k: r.size()[2:] for k, r in rollouts.obs.items()}
+        rollouts_flatten = {k: r[:-1].view(-1, *obs_shape[k]) for k, r in rollouts.obs.items()}
+        action_shape = rollouts.actions.size()[-1]
+        num_steps, num_processes, _ = rollouts.rewards.size()
 
-        for e in range(self.ppo_epoch):
-            if self.model.is_recurrent:
-                data_generator = rollouts.recurrent_generator(
-                    advantages, self.num_mini_batch)
-            else:
-                data_generator = rollouts.feed_forward_generator(
-                    advantages, self.num_mini_batch)
+        values, action_log_probs, dist_entropy, _ = self.model.evaluate_actions(
+            rollouts_flatten['img'],
+            rollouts_flatten['v'],
+            rollouts.recurrent_hidden_states[0].view(-1, self.model.recurrent_hidden_state_size),
+            rollouts.masks[:-1].view(-1, 1),
+            rollouts.actions.view(-1, action_shape))
 
-            for sample in data_generator:
-                obs_batch, recurrent_hidden_states_batch, actions_batch, \
-                   value_preds_batch, return_batch, masks_batch, old_action_log_probs_batch, \
-                        adv_targ = sample
+        values = values.view(num_steps, num_processes, 1)
+        action_log_probs = action_log_probs.view(num_steps, num_processes, 1)
 
-                # Reshape to do in a single forward pass for all steps
-                values, action_log_probs, dist_entropy, _ = self.model.evaluate_actions(
-                    obs_batch['img'], obs_batch['v'], recurrent_hidden_states_batch,
-                    masks_batch, actions_batch)
+        # 6: Estimate policy gradient
+        action_loss = (action_log_probs*advantages).mean()
 
-                ratio = torch.exp(action_log_probs - old_action_log_probs_batch)
-                surr1 = ratio * adv_targ
-                surr2 = torch.clamp(ratio, 1.0 - self.clip_param,
-                                           1.0 + self.clip_param) * adv_targ
-                action_loss = -torch.min(surr1, surr2).mean()
+        # 8: Fit value function by regression on mean-squared error
+        value_loss = 0.5 * F.mse_loss(returns, values)
 
-                if self.use_clipped_value_loss:
-                    value_pred_clipped = value_preds_batch + \
-                        (values - value_preds_batch).clamp(-self.clip_param, self.clip_param)
-                    value_losses = (values - return_batch).pow(2)
-                    value_losses_clipped = (value_pred_clipped - return_batch).pow(2)
-                    value_loss = .5 * torch.max(value_losses, value_losses_clipped).mean()
-                else:
-                    value_loss = 0.5 * F.mse_loss(return_batch, values)
+        # 7: Compute policy update
+        self.optimizer.zero_grad()
+        (value_loss * self.value_loss_coef + action_loss -
+         dist_entropy * self.entropy_coef).backward()
+        nn.utils.clip_grad_norm_(self.model.parameters(),
+                                 self.max_grad_norm)
+        self.optimizer.step()
 
-                self.optimizer.zero_grad()
-                (value_loss * self.value_loss_coef + action_loss -
-                 dist_entropy * self.entropy_coef).backward()
-                nn.utils.clip_grad_norm_(self.model.parameters(),
-                                         self.max_grad_norm)
-                self.optimizer.step()
-
-                value_loss_epoch += value_loss.item()
-                action_loss_epoch += action_loss.item()
-                dist_entropy_epoch += dist_entropy.item()
-
-        num_updates = self.ppo_epoch * self.num_mini_batch
-
-        value_loss_epoch /= num_updates
-        action_loss_epoch /= num_updates
-        dist_entropy_epoch /= num_updates
-
-        return value_loss_epoch, action_loss_epoch, dist_entropy_epoch
+        return value_loss.item(), action_loss.item(), dist_entropy.item()
 
     def act(self, inputs, rnn_hxs, masks, deterministic=False):
         eps_curr = 0. # TODO: Change if you want to implement epsilon-greedy
