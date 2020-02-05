@@ -20,8 +20,8 @@ def get_args():
                         help='disables CUDA training')
     parser.add_argument('--save-dir', default='./outputs', help='directory to save models, logs and videos')
     parser.add_argument('--resume-training', default=None, help='checkpoint file to resume training from')
-    parser.add_argument('--follow-curriculum', default=None, help='curriculum \
-            file to follow')
+    parser.add_argument('--follow-curriculum', action='store_true', help='use \
+            curriculum')
     args = parser.parse_args()
 
     args.cuda = not args.no_cuda and torch.cuda.is_available()

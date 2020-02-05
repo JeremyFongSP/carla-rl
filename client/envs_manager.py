@@ -25,14 +25,14 @@ def make_env(obs_converter, action_converter, port, id, seed, subset,
 def make_vec_envs(obs_converter, action_converter, starting_port, seed, num_processes, gamma,
                   device, reward_class_name, num_frame_stack=1, subset=None, norm_reward=True, norm_obs=True, video_every=100, video_dir='./video', apply_her=False,
                   experiment_suite='TrainingSuite', benchmark=False,
-                  city_name='Town01', curriculum):
+                  city_name='Town01', curriculum=False):
 
     ports = range(starting_port, starting_port + 3*num_processes, 3)
     envs = [make_env(obs_converter, action_converter, ports[i], i, seed + i,
                      subset, video_every, video_dir, reward_class_name,
                      experiment_suite,
-                     benchmark, city_name) for i in range(num_processes),
-                     curriculum]
+                     benchmark, city_name,
+                     curriculum) for i in range(num_processes)]
 
     if len(envs) > 1 or apply_her:
         envs = SubprocVecEnv(envs)
