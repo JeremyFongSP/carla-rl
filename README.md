@@ -10,8 +10,11 @@ This project is forked from [carla-rl-gym/carla-rl](https://github.com/carla-rl-
 * Implement Imitation Learning
 
 ## Ubuntu Installation and Setup for CARLA
-The Carla simulator requires 2 running processes: __Server__ and __Client__. 
+The Carla simulator requires 2 running processes: __Server__ and __Client__.
+
 The server generates the specifics of the map. The client runs the algorithms and training process.
+
+*(Note that all paths are relative to this repository's path)*
 
 ### Update Nvidia Drivers
 The setup required nvidia-docker to run both server and client.
@@ -84,8 +87,6 @@ See list of arguments below
 
 #### Config Files and Arguments
 `client/train.py` requires either `--config [YAML_FILE]` or `--resume-training [.PTH.TAR_FILE]`
-
-*(Note that all paths are relative to this repository's path)*
 
 Useful flags:
 
