@@ -39,7 +39,8 @@ class CarlaEnv(object):
                  video_every=100,
                  video_dir='./video/',
                  distance_for_success=2.0,
-                 benchmark=False):
+                 benchmark=False,
+                 curriculum=False):
 
         self.logger = get_carla_logger()
         self.logger.info('Environment {} running in port {}'.format(env_id, port))
@@ -81,6 +82,7 @@ class CarlaEnv(object):
         self.steps = 0
         self.num_episodes = 0
         self.current_set = 0
+        self.curriculum = curriculum
 
     def step(self, action):
 
@@ -263,8 +265,17 @@ class CarlaEnv(object):
 
 
     def _new_episode(self):
-        experiment_idx, idx_pose = curriculum_learning(self)
-        experiment = self._experiments[experiment_idx]
+
+        # If curriculum flag is specified, use the curriculum_learning function
+        # located in curriculum/curriculum.py to sequentially set new
+        # environment every time it successfully completes a task
+        if self.curriculum:
+            experiment_idx, idx_pose = curriculum_learning(self)
+        else:
+            experiment_idx = np.random.randint(0, len(self._experiments))
+            experiment = self._experiments[experiment_idx]
+            idx_pose = np.random.randint(0, len(experiment.poses))
+
         exp_settings = experiment.conditions
         exp_settings.set(QualityLevel='Low')
         positions = self._client.load_settings(exp_settings).player_start_spots
