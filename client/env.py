@@ -270,7 +270,11 @@ class CarlaEnv(object):
         # located in curriculum/curriculum.py to sequentially set new
         # environment every time it successfully completes a task
         if self.curriculum:
-            experiment_idx, idx_pose = curriculum_learning(self)
+            dirname = os.path.dirname(__file__)
+            currfile = os.path.join(dirname,
+                                    'curriculum/curriculum_to_follow.yaml')
+            experiment_idx, idx_pose = curriculum_learning(self, currfile)
+            experiment = self._experiments[experiment_idx]
         else:
             experiment_idx = np.random.randint(0, len(self._experiments))
             experiment = self._experiments[experiment_idx]
