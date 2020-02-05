@@ -60,7 +60,7 @@ class VPGCarla(Agent):
         action_log_probs = action_log_probs.view(num_steps, num_processes, 1)
 
         # 6: Estimate policy gradient
-        action_loss = (action_log_probs*advantages).mean()
+        action_loss = -(action_log_probs*advantages).mean()
 
         # 8: Fit value function by regression on mean-squared error
         value_loss = 0.5 * F.mse_loss(returns, values)

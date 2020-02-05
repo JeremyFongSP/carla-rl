@@ -15,6 +15,7 @@ from carla.client import CarlaClient
 from carla.tcp import TCPConnectionError
 from observation_utils import CameraException
 import gym
+from curriculum import curriculum_learning
 
 from carla_logger import get_carla_logger
 # TODO: Remove this before open-sourcing environment
@@ -79,7 +80,7 @@ class CarlaEnv(object):
             pass
         self.steps = 0
         self.num_episodes = 0
-
+        self.current_set = 0
 
     def step(self, action):
 
@@ -262,12 +263,11 @@ class CarlaEnv(object):
 
 
     def _new_episode(self):
-        experiment_idx = np.random.randint(0, len(self._experiments))
+        experiment_idx, idx_pose = curriculum_learning(self)
         experiment = self._experiments[experiment_idx]
         exp_settings = experiment.conditions
         exp_settings.set(QualityLevel='Low')
         positions = self._client.load_settings(exp_settings).player_start_spots
-        idx_pose = np.random.randint(0, len(experiment.poses))
         pose = experiment.poses[idx_pose]
         self.logger.info('Env {} gets experiment {} with pose {}'.format(self.id, experiment_idx, idx_pose))
         start_index = pose[0]
