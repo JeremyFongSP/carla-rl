@@ -11,6 +11,9 @@ def curriculum_learning(obj, file):
     with open(file, 'r') as curr_file:
         yaml_list = yaml.safe_load(curr_file)
 
+    # The curriculum training sequence is a list which starts with 'curr_list'
+    # Here we are storing this list under curriculum_training_set to be able to
+    # easily call each item of the list
     curriculum_training_set = yaml_list['curr_list']
 
     # The distance to goal the agent achieved last time. Success in the Carla
