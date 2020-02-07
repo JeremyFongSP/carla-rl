@@ -1,0 +1,18 @@
+version: '2.3'
+
+services:
+  carla-server:
+    build: ./server/
+    ports:
+        - 2000-2002:2000-2002
+    image: carla-server
+
+  carla-client:
+    build: ./client/
+    runtime: nvidia
+    network_mode: 'host'
+    volumes:
+        - .:/app
+    image: carla-client
+    depends_on:
+        - carla-server
