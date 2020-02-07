@@ -4,8 +4,10 @@ import yaml
 
 def curriculum_learning(obj, file):
     """Curriculum training for better generalization, currently implemented in
-    an ad-hoc method. This only serves as proof of concept"""
+    an ad-hoc method. This only serves as proof of concept. The obj argument
+    refers to the CarlaEnv itself, file refers to the curriculum_to_follow.yaml"""
 
+    # Reads curriculum_to_follow.yaml and organizes it into an array
     with open(file, 'r') as curr_file:
         yaml_list = yaml.safe_load(curr_file)
 
