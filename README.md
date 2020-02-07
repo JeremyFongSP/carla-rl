@@ -4,6 +4,7 @@ This project is forked from [carla-rl-gym/carla-rl](https://github.com/carla-rl-
 ### Additions to the original repo
 * The Vanilla Policy Gradient algorithm (VPG) was added for benchmarking
 * Curriculum learning implemented to original code (run with `--follow-curriculum` flag)
+* Docker Compose file
 
 ### Future work
 * Implement SAC to see improvement and then train with CL
@@ -16,7 +17,8 @@ The server generates the specifics of the map. The client runs the algorithms an
 
 *(Note that all paths are relative to this repository's path)*
 
-### Update Nvidia Drivers
+### REQUIREMENTS
+#### Update Nvidia drivers
 The setup required nvidia-docker to run both server and client.
 To use the nvidia-docker, a GPU is required with updated graphics driver.
 To update Nvidia drivers use,
@@ -30,26 +32,49 @@ Take note of the available drivers then run,
 sudo apt install nvidia-driver-DRIVER_NUMBER
 ```
 
-### SERVER
-
-#### Build Server (one time)
-Install CARLA using the Docker container by running,
+### CARLA DOCKER INSTALLATION (One time)
+All directories are relative to this repository, change directory
+```
+cd ~/carla-rl
+```
+Install CARLA using the Docker container from Docker-Hub:
 ```
 docker pull carlasim/carla:0.8.2
 ```
-
-Build modified CARLA server using Docker by running,
+Build modified CARLA __server__:
 ```
 docker build server -t carla-server
 ```
+Build modified CARLA __client__:
+```
+docker build client -t carla-client
+```
 
-#### Running CARLA server
-Next, run Docker container with,
+---
+
+### QUICK START
+Effortlessly start the Server and Client simultaneously with standard settings using Docker-Compose:
+```
+docker-compose run --service-ports carla-client bash
+```
+This command starts the server in the background and opens a terminal for the client. To start training, use:
+```
+python client/train.py --config client/config/vpg.yaml --follow-curriculum
+```
+
+---
+
+
+### CUSTOM SETTINGS
+Specifying desired settings for both server and client are done as indicated below:
+
+#### SERVER
+Start Server using nvidia-docker, eg:
 ```
 nvidia-docker run --rm -it -p 2000-2002:2000-2002 carlasim/carla:0.8.2 /bin/bash
 ```
 
-Inside the Docker container, run server with,
+From inside the Docker container, run server with:
 ```
 ./CarlaUE4.sh /Game/Maps/Town01 -carla-server -benchmark -fps=15 -windowed -ResX=800 -ResY=600
 ```
@@ -58,48 +83,31 @@ The logs for stdout and stderr will be under `server_output` folder
 
 Servers output `docker logs -ft CONTAINER_ID` follows and tails it.
 
-### CLIENT
-
-#### Build Client (one time)
-Code requires:
-* Python 3
-* PyTorch
-* OpenAI Gym (v 0.10.8)
-* OpenAI Baselines
-
-Build modified CARLA client using Dockerfile with,
-```
-docker build client -t carla-client
-```
-
-#### Running CARLA client (training code, benchmark code)
-To run the client,
+#### CLIENT
+Start Client using nvidia-docker, eg:
 ```
 nvidia-docker run -it --network=host -v $PWD:/app carla-client /bin/bash
 ```
-(`--network=host` flag allows the Docker container to make requests to the server)
 
-Inside the Docker container, run scripts using for example,
+From inside the Docker container, start training with:
 ```
 python client/train.py --config client/config/base.yaml
 ```
-See list of arguments below
 
-#### Config Files and Arguments
+
 `client/train.py` requires either `--config [YAML_FILE]` or `--resume-training [.PTH.TAR_FILE]`
 
 Useful flags:
-
-`--save-dir [OUTPUT_PATH]`
-`--starting-port [PORT]`
-`--video-interval [NUM_EPISODES]`
-`--follow-curriculum`
+* --save-dir [RELATIVE_OUTPUT_PATH]
+* --starting-port [PORT]
+* --video-interval [NUM_EPISODES]
+* --follow-curriculum
 
 #### Hyperparameter Tuning
 To test a set of hyperparemeters see the `scripts/test_hyperparameters_parallel.py` script. This will let you specify a set of hyperparameters to test different from those specified in the `client/config/base.yaml` file.
 
 ## Curriculum Learning
-To test out the sequencial learning with CL, add the `--follow-curriculum` flag when launching train.py eg,
+To test out the sequencial learning with CL, add the `--follow-curriculum` flag when training, eg:
 ```
 python client/train.py --config client/config/ppo.yaml --follow-curriculum
 ```
