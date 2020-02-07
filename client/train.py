@@ -98,6 +98,10 @@ def main():
     if args.config:
         shutil.copy2(args.config, save_dir_config)
 
+    curriculum = args.follow_curriculum
+    if args.follow_curriculum:
+        print('Using preset curriculum')
+
     # Tensorboard Logging
     writer = SummaryWriter(os.path.join(args.save_dir, 'tensorboard', experiment_name))
 
@@ -114,8 +118,10 @@ def main():
     envs = make_vec_envs(obs_converter, action_converter, args.starting_port, config.seed, config.num_processes,
                                 config.gamma, device, config.reward_class, num_frame_stack=1, subset=config.experiments_subset,
                                 norm_reward=norm_reward, norm_obs=norm_obs, apply_her=config.num_virtual_goals > 0,
-                                video_every=args.video_interval, video_dir=os.path.join(args.save_dir, 'video', experiment_name))
-
+                                video_every=args.video_interval,
+                                video_dir=os.path.join(args.save_dir, 'video',
+                                    experiment_name),
+                                curriculum=curriculum)
 
     if config.agent == 'forward':
         agent = agents.ForwardCarla()
@@ -272,7 +278,8 @@ def main():
         if (args.eval_interval is not None and j % args.eval_interval == 0):
             eval_envs = make_vec_envs(
                 args.env_name, args.starting_port, obs_converter, args.x + config.num_processes, config.num_processes,
-                config.gamma, eval_log_dir, config.add_timestep, device, True)
+                config.gamma, eval_log_dir, config.add_timestep, device, True,
+                curriculum)
 
             vec_norm = get_vec_normalize(eval_envs)
             if vec_norm is not None:

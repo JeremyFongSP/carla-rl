@@ -1,0 +1,20 @@
+# Insert the experiment and poses to be trained on here.
+# The double brackets indicate single experiment/pose pair
+# The staggered single bracket represent a set of exp/pose pair on which
+# curriculum.py will pick at random
+# Do not forget the empty list line when adding a new set (single
+# bracket) of experiment/pose pairs
+
+# The brackets are done as a hacky way to get the length of each sets
+# eg: curriculum_training_set[current_set][specific_example][element]
+# 1) current_set is eg: [[1, 1], [2, 5], [2, 9]],
+# 2) specific_example is eg: [2, 5] from (1), eq to 0 if only 1 element
+# 3) element is eg: 2 from (2)
+curr_list :
+    - [[1, 1]]
+    - [[2, 9]]
+    - [[2, 5]]
+    -
+        - [1, 1]
+        - [2, 9]
+        - [2, 5]
