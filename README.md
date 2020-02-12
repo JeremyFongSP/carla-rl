@@ -99,18 +99,15 @@ nvidia-docker run -it --network=host -v $PWD:/app carla-client python client/tra
 
 <a name="curriculum-learning"></a>
 ### Curriculum Learning
-To test out the sequential learning with CL, add the `--follow-curriculum` flag when training, eg:
-```
-python client/train.py --config client/config/ppo.yaml --follow-curriculum
-```
+To test out the sequential learning with CL, add the `--follow-curriculum` flag when training.
 
-This flag reads the `client/curriculum/curriculum_to_follow.yaml` file. This is where the list of experiments and poses are specified.
+This flag reads the `client/curriculum/curriculum_to_follow.yaml` file where the list of experiments and poses are specified.
 
 ---
 
 <a name="optional-settings"></a>
 ### Optional Settings
-To try out different settings, it is preferable to split the above command into 2 for both server and client
+To try out different settings, it is preferable to split the quick start commands into 2 for both server and client
 
 <a name="server"></a>
 #### Server
