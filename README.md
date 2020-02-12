@@ -11,18 +11,18 @@ __Future work__
 * Implement SAC to see improvement and then train with CL
 
 ### Contents
-- [Ubuntu Installation for CARLA](#ubuntu-install)
-  * [REQUIREMENTS](#requirements)
-    + [Clone this Repository](#clone)
-    + [Update System & Nvidia Drivers](#nvidia-drivers)
-    + [Install Docker, Nvidia-Docker & Docker-Compose](#docker-nvidia-compose)
-  * [CARLA DOCKER INSTALLATION](#docker-install)
+- [Ubuntu Installation requirements](#ubuntu-requirements)
+  * [Clone this Repository](#clone)
+  * [Update System & Nvidia Drivers](#nvidia-drivers)
+  * [Install Docker, Nvidia-Docker & Docker-Compose](#docker-nvidia-compose)
+  * [Carla Docker Setup](#docker-setup)
 - [Usage](#usage)
-  * [QUICK START](#quick-start)
-  * [CURRICULUM LEARNING](#curriculum-learning)
-  * [OPTIONAL SETTINGS](#optional-settings)
+  * [Quick Start](#quick-start)
+  * [Curriculum Learning](#curriculum-learning)
+  * [Optional Settings](#optional-settings)
     + [Server](#server)
     + [Client](#client)
+    + [Multiple Instances](#multiple-instances)
     + [Hyperparameter Tuning](#hyperparameter-tuning)
 - [Benchmark Results](#benchmark-results)
   * [VPG](#vpg)
@@ -31,21 +31,22 @@ __Future work__
   * [PPO](#ppo)
   * [On-Policy HER](#her)
 
-<a name="ubuntu-install"></a>
-## Ubuntu Installation for CARLA
-CARLA requires 2 running processes: *Server* and *Client*. The server generates the map. The client runs the training process.
-
-<a name="requirements"></a>
-### REQUIREMENTS
+<a name="ubuntu-requirements"></a>
+## Ubuntu Requirements
+It is recommended to run this on a cloud computing platform such as AWS EC2.
+Installing everything including all dependencies will require:
+ * __80GB__  of disk space
+ * Nvidia GPU
+ * 10-20 minutes
 
 <a name="clone"></a>
-#### Clone this Repository
+### 1. Clone this Repository
 ```
 git clone https://github.com/JeremyFongSP/carla-rl.git
 ```
 
 <a name="nvidia-drivers"></a>
-#### Update System & Nvidia Drivers
+### 2. Update System & Nvidia Drivers
 This repo uses nvidia-dockers and requires a GPU with updated graphics drivers.
 To update nvidia drivers use:
 ```
@@ -55,33 +56,39 @@ ubuntu-drivers list
 ```
 Take note of the available drivers then run:
 ```
-sudo apt install nvidia-driver-DRIVER_NUMBER
+sudo apt install nvidia-DRIVER_NUMBER
 ```
 
 <a name="docker-nvidia-compose"></a>
-#### Install Docker, Nvidia-Docker & Docker-Compose
+### 3. Install Docker, Nvidia-Docker & Docker-Compose
 [Docker](https://docs.docker.com/install/) & [Nvidia-Docker](https://github.com/NVIDIA/nvidia-docker) containers automatically install the required dependencies.
 
 [Docker-Compose](https://docs.docker.com/compose/) automatically starts multiple docker services (server and client), see [QUICK START](#quick-start)
 
-<a name="docker-install"></a>
-### CARLA DOCKER INSTALLATION
+<a name="docker-setup"></a>
+### 4. Carla Docker Setup
+CARLA requires 2 running processes: *Server* and *Client*
+
 Change directory `cd ~/carla-rl` *(Note that all paths are relative to this repository)*
 
 Install CARLA using the Docker container from Docker-Hub:
 ```
 docker pull carlasim/carla:0.8.2
 ```
+Install modified Server & Client using:
+```
+docker-compose up -d
+```
 
 <a name="usage"></a>
 ## Usage
 <a name="quick-start"></a>
-### QUICK START
-Start Server and Client simultaneously with standard settings using Docker-Compose:
+### Quick Start
+ 1. Start Server and Client simultaneously with standard settings using Docker-Compose:
 ```
 docker-compose run --service-ports carla-client bash
 ```
-This starts the server in the background and starts bash on the client container. To start training, use the command:
+ 2. This starts the server in the background and starts bash on the client container. To start training, use the command:
 ```
 python client/train.py --config client/config/vpg.yaml --follow-curriculum
 ```
@@ -105,43 +112,48 @@ Specify desired settings for both server and client:
 
 <a name="server"></a>
 #### Server
-Build modified CARLA server:
-```
-docker build server -t carla-server
-```
-Start Server using nvidia-docker with custom settings, eg:
+ 1. Start server container with:
 ```
 nvidia-docker run --rm -it -p 2000-2002:2000-2002 carlasim/carla:0.8.2 /bin/bash
 ```
 
-From inside the Docker container, run CARLA with custom settings, eg:
+ 2. From inside the container, execute:
 ```
 ./CarlaUE4.sh /Game/Maps/Town01 -carla-server -benchmark -fps=15 -windowed -ResX=800 -ResY=600
 ```
+Possible changes:
+* Port number (-p [PORT_NUMBER])
+* Town01 or Town02
+* Output Frame per second (set -fps=[FPS])
+* Windowed (omit for full screen)
+* Output Resolution
 
 <a name="client"></a>
 #### Client
-Build modified CARLA client:
-```
-docker build client -t carla-client
-```
-Start Client using nvidia-docker with custom settings, eg:
+ 3. Start client container with:
 ```
 nvidia-docker run -it --network=host -v $PWD:/app carla-client /bin/bash
 ```
 
-From inside the Docker container, start training agent with custom settings, eg:
+ 4. From inside the container, execute:
 ```
-python client/train.py --config client/config/base.yaml --save-dir outputs/base --starting-port 2000 --follow-curriculum
+python client/train.py --config client/config/vpg.yaml
 ```
-
-Training requires either `--config [YAML_FILE]` or `--resume-training [.PTH.TAR_FILE]`
-
 Useful flags:
+* --config [YAML_FILE]  or  --resume-training [.PTH.TAR_FILE]
 * --save-dir [RELATIVE_OUTPUT_PATH]
 * --starting-port [PORT_MATCHING SERVER]
 * --video-interval [NUM_EPISODES]
 * --follow-curriculum
+
+<a name="multiple-instances"></a>
+#### Multiple Instances
+
+To run multiple instances, open two new terminal and start cleint/server with the following modifications:
+ 1. Change the server port from `2000-2002:2000-2002` to eg: `4000-4002:2000-2002`
+ 2. Specify the matching *--starting-port* flag for the client, eg: `--starting-port 4000`
+ 
+ (Using tmux is a convenient way to avoid opening too many terminal)
 
 <a name="hyperparameter-tuning"></a>
 #### Hyperparameter Tuning
