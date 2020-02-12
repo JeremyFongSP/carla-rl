@@ -66,18 +66,15 @@ sudo apt install nvidia-DRIVER_NUMBER
 ### 4. Carla Docker Setup
 CARLA requires 2 running processes: *Server* and *Client*.
 
- 0. Change directory `cd ~/carla-rl` *(Note that all paths are relative to this repository)*
+Change directory `cd ~/carla-rl` *(Note that all paths are relative to this repository)*
 
- 1. Install CARLA using the Docker container from Docker-Hub:
+Install CARLA using the Docker container from Docker-Hub:
 ```
 docker pull carlasim/carla:0.8.2
 ```
- 2. Build modified CARLA __server__:
+Build modified CARLA __server__ & __client__:
 ```
 docker build server -t carla-server
-```
- 3. Build modified CARLA __client__:
-```
 docker build client -t carla-client
 ```
 
