@@ -14,6 +14,7 @@ __Future work__
 - [Ubuntu Installation and Setup for CARLA](#ubuntu-install)
   * [REQUIREMENTS](#requirements)
     + [Update System & Nvidia Drivers](#nvidia-drivers)
+    + [Clone this Repository](#clone)
     + [Install Docker, Nvidia-Docker & Docker-Compose](#docker-nvidia-compose)
   * [CARLA DOCKER INSTALLATION](#docker-install)
   * [QUICK START](#quick-start)
@@ -33,8 +34,6 @@ __Future work__
 ## Ubuntu Installation and Setup for CARLA
 CARLA requires 2 running processes: *Server* and *Client*. The server generates the map. The client runs the training process.
 
-__(Note that all paths are relative to this repository)__
-
 <a name="requirements"></a>
 ### REQUIREMENTS
 
@@ -52,6 +51,12 @@ Take note of the available drivers then run:
 sudo apt install nvidia-driver-DRIVER_NUMBER
 ```
 
+<a name="clone"></a>
+#### Clone this Repository
+```
+git clone https://github.com/JeremyFongSP/carla-rl.git
+```
+
 <a name="docker-nvidia-compose"></a>
 #### Install Docker, Nvidia-Docker & Docker-Compose
 [Docker](https://docs.docker.com/install/) & [Nvidia-Docker](https://github.com/NVIDIA/nvidia-docker) containers automatically install the required dependencies.
@@ -61,19 +66,11 @@ sudo apt install nvidia-driver-DRIVER_NUMBER
 ---
 <a name="docker-install"></a>
 ### CARLA DOCKER INSTALLATION
-Change directory `cd ~/carla-rl`
+Change directory `cd ~/carla-rl` *(Note that all paths are relative to this repository)*
 
 Install CARLA using the Docker container from Docker-Hub:
 ```
 docker pull carlasim/carla:0.8.2
-```
-Build modified CARLA __server__:
-```
-docker build server -t carla-server
-```
-Build modified CARLA __client__:
-```
-docker build client -t carla-client
 ```
 
 ---
@@ -96,26 +93,35 @@ Specify desired settings for both server and client:
 
 <a name="server"></a>
 #### Server
-Start Server using nvidia-docker, eg:
+Build modified CARLA server:
+```
+docker build server -t carla-server
+```
+Start Server using nvidia-docker with custom settings, eg:
 ```
 nvidia-docker run --rm -it -p 2000-2002:2000-2002 carlasim/carla:0.8.2 /bin/bash
 ```
 
-From inside the Docker container, run server with:
+From inside the Docker container, run CARLA with custom settings, eg:
 ```
 ./CarlaUE4.sh /Game/Maps/Town01 -carla-server -benchmark -fps=15 -windowed -ResX=800 -ResY=600
 ```
 
+
 <a name="client"></a>
 #### Client
-Start Client using nvidia-docker, eg:
+Build modified CARLA client:
+```
+docker build client -t carla-client
+```
+Start Client using nvidia-docker with custom settings, eg:
 ```
 nvidia-docker run -it --network=host -v $PWD:/app carla-client /bin/bash
 ```
 
-From inside the Docker container, start training with:
+From inside the Docker container, start training agent with custom settings, eg:
 ```
-python client/train.py --config client/config/base.yaml
+python client/train.py --config client/config/base.yaml --save-dir outputs/base --starting-port 2000 --follow-curriculum
 ```
 
 Training requires either `--config [YAML_FILE]` or `--resume-training [.PTH.TAR_FILE]`
