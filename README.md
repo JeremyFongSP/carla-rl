@@ -11,7 +11,7 @@ __Future work__
 * Implement SAC to see improvement and then train with CL
 
 ### Contents
-- [Ubuntu Installation requirements](#ubuntu-requirements)
+- [Ubuntu Requirements](#ubuntu-requirements)
   * [Clone this Repository](#clone)
   * [Update System & Nvidia Drivers](#nvidia-drivers)
   * [Install Docker, Nvidia-Docker & Docker-Compose](#docker-nvidia-compose)
@@ -63,7 +63,7 @@ sudo apt install nvidia-DRIVER_NUMBER
 ### 3. Install Docker, Nvidia-Docker & Docker-Compose
 [Docker](https://docs.docker.com/install/) & [Nvidia-Docker](https://github.com/NVIDIA/nvidia-docker) containers automatically install the required dependencies.
 
-[Docker-Compose](https://docs.docker.com/compose/) automatically starts multiple docker services (server and client), see [QUICK START](#quick-start)
+[Docker-Compose](https://docs.docker.com/compose/) automatically starts multiple docker services (server and client)
 
 <a name="docker-setup"></a>
 ### 4. Carla Docker Setup
@@ -88,7 +88,9 @@ docker-compose up -d
 ```
 docker-compose run --service-ports carla-client bash
 ```
- 2. This starts the server in the background and starts bash on the client container. To start training, use the command:
+This starts the server in the background and starts bash on the client container. 
+
+2. When the terminal user changes to root (this is within the container), start training with CL, using:
 ```
 python client/train.py --config client/config/vpg.yaml --follow-curriculum
 ```
@@ -97,10 +99,7 @@ python client/train.py --config client/config/vpg.yaml --follow-curriculum
 
 <a name="curriculum-learning"></a>
 ### Curriculum Learning
-To test out the sequencial learning with CL, add the `--follow-curriculum` flag when training, eg:
-```
-python client/train.py --config client/config/ppo.yaml --follow-curriculum
-```
+To test out the sequential learning with CL, add the `--follow-curriculum` flag when training
 
 This flag reads the `client/curriculum/curriculum_to_follow.yaml` file where the list of experiments and poses are specified.
 
@@ -108,8 +107,6 @@ This flag reads the `client/curriculum/curriculum_to_follow.yaml` file where the
 
 <a name="optional-settings"></a>
 ### Optional Settings
-Specify desired settings for both server and client:
-
 <a name="server"></a>
 #### Server
  1. Start server container with:
@@ -134,7 +131,6 @@ Possible changes:
 ```
 nvidia-docker run -it --network=host -v $PWD:/app carla-client /bin/bash
 ```
-
  4. From inside the container, execute:
 ```
 python client/train.py --config client/config/vpg.yaml
@@ -149,11 +145,11 @@ Useful flags:
 <a name="multiple-instances"></a>
 #### Multiple Instances
 
-To run multiple instances, open two new terminal and start cleint/server with the following modifications:
+To run multiple instances, open two new terminal and start client/server with the following modifications:
  1. Change the server port from `2000-2002:2000-2002` to eg: `4000-4002:2000-2002`
  2. Specify the matching *--starting-port* flag for the client, eg: `--starting-port 4000`
  
- (Using tmux is a convenient way to avoid opening too many terminal)
+ (Using tmux is a convenient way to avoid opening too many terminals)
 
 <a name="hyperparameter-tuning"></a>
 #### Hyperparameter Tuning
