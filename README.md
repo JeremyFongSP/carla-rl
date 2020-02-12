@@ -1,5 +1,5 @@
 # Improving Carla-RL Training with Curriculum Learning
-Forked from [carla-rl-gym/carla-rl](https://github.com/carla-rl-gym/carla-rl). This project was done at Insight Data Science in January 2020 (20A.AI.SV). The goal is to reproduce results obtained by seansegal, analyze differences between algorithms and implement curriculum learning (CL). 
+Forked from [carla-rl-gym/carla-rl](https://github.com/carla-rl-gym/carla-rl). This project was done at Insight Data Science in January 2020 (20A.AI.SV). The goal is to reproduce results obtained by [seansegal](https://github.com/seansegal), analyze differences between algorithms and implement curriculum learning (CL). 
 
 __Additions to the original repo__
 * Vanilla Policy Gradient algorithm (VPG) added for benchmarking
@@ -11,18 +11,19 @@ __Future work__
 * Implement SAC to see improvement and then train with CL
 
 ### Contents
-- [Ubuntu Installation and Setup for CARLA](#ubuntu-install)
+- [Ubuntu Installation for CARLA](#ubuntu-install)
   * [REQUIREMENTS](#requirements)
-    + [Update System & Nvidia Drivers](#nvidia-drivers)
     + [Clone this Repository](#clone)
+    + [Update System & Nvidia Drivers](#nvidia-drivers)
     + [Install Docker, Nvidia-Docker & Docker-Compose](#docker-nvidia-compose)
   * [CARLA DOCKER INSTALLATION](#docker-install)
+- [Usage](#usage)
   * [QUICK START](#quick-start)
-  * [CUSTOM SETTINGS](#custom-settings)
+  * [CURRICULUM LEARNING](#curriculum-learning)
+  * [OPTIONAL SETTINGS](#optional-settings)
     + [Server](#server)
     + [Client](#client)
     + [Hyperparameter Tuning](#hyperparameter-tuning)
-- [Curriculum Learning](#curriculum-learning)
 - [Benchmark Results](#benchmark-results)
   * [VPG](#vpg)
   * [A2C](#a2c)
@@ -31,11 +32,17 @@ __Future work__
   * [On-Policy HER](#her)
 
 <a name="ubuntu-install"></a>
-## Ubuntu Installation and Setup for CARLA
+## Ubuntu Installation for CARLA
 CARLA requires 2 running processes: *Server* and *Client*. The server generates the map. The client runs the training process.
 
 <a name="requirements"></a>
 ### REQUIREMENTS
+
+<a name="clone"></a>
+#### Clone this Repository
+```
+git clone https://github.com/JeremyFongSP/carla-rl.git
+```
 
 <a name="nvidia-drivers"></a>
 #### Update System & Nvidia Drivers
@@ -49,12 +56,6 @@ ubuntu-drivers list
 Take note of the available drivers then run:
 ```
 sudo apt install nvidia-driver-DRIVER_NUMBER
-```
-
-<a name="clone"></a>
-#### Clone this Repository
-```
-git clone https://github.com/JeremyFongSP/carla-rl.git
 ```
 
 <a name="docker-nvidia-compose"></a>
@@ -73,7 +74,8 @@ Install CARLA using the Docker container from Docker-Hub:
 docker pull carlasim/carla:0.8.2
 ```
 
----
+<a name="usage"></a>
+## Usage
 <a name="quick-start"></a>
 ### QUICK START
 Start Server and Client simultaneously with standard settings using Docker-Compose:
@@ -87,8 +89,19 @@ python client/train.py --config client/config/vpg.yaml --follow-curriculum
 
 ---
 
-<a name="custom-settings"></a>
-### CUSTOM SETTINGS
+<a name="curriculum-learning"></a>
+### CURRICULUM LEARNING
+To test out the sequencial learning with CL, add the `--follow-curriculum` flag when training, eg:
+```
+python client/train.py --config client/config/ppo.yaml --follow-curriculum
+```
+
+This flag reads the `client/curriculum/curriculum_to_follow.yaml` file. This is where the list of experiments and poses are specified.
+
+---
+
+<a name="optional-settings"></a>
+### OPTIONAL SETTINGS
 Specify desired settings for both server and client:
 
 <a name="server"></a>
@@ -106,7 +119,6 @@ From inside the Docker container, run CARLA with custom settings, eg:
 ```
 ./CarlaUE4.sh /Game/Maps/Town01 -carla-server -benchmark -fps=15 -windowed -ResX=800 -ResY=600
 ```
-
 
 <a name="client"></a>
 #### Client
@@ -135,15 +147,6 @@ Useful flags:
 <a name="hyperparameter-tuning"></a>
 #### Hyperparameter Tuning
 To test a set of hyperparemeters, see the `scripts/test_hyperparameters_parallel.py` script. This allows you to specify a set of hyperparameters to test different from `client/config/base.yaml` config files.
-
-<a name="curriculum-learning"></a>
-## Curriculum Learning
-To test out the sequencial learning with CL, add the `--follow-curriculum` flag when training, eg:
-```
-python client/train.py --config client/config/ppo.yaml --follow-curriculum
-```
-
-This flag reads the `client/curriculum/curriculum_to_follow.yaml` file. This is where the list of experiments and poses are specified.
 
 <a name="benchmark-results"></a>
 ## Benchmark Results
