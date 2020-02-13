@@ -56,9 +56,9 @@ sudo apt update
 sudo apt upgrade
 ubuntu-drivers list
 ```
-Take note of the available drivers then run:
+Take note of the available drivers (if multiple, take the most recent) then run:
 ```
-sudo apt install nvidia-DRIVER_NUMBER
+sudo apt install nvidia-[DRIVER_NUMBER]
 ```
 
 <a name="docker-nvidia-compose"></a>
