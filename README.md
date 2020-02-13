@@ -10,6 +10,8 @@ __Future work__
 * Implement Imitation Learning
 * Implement SAC to see improvement and then train with CL
 
+![carla-rl-cl.gif](carla-rl-cl.gif)
+
 ### Contents
 - [Ubuntu Requirements](#ubuntu-requirements)
   * [Clone this Repository](#clone)
