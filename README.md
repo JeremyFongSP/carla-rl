@@ -1,5 +1,5 @@
 # Improving Carla-RL Training with Curriculum Learning
-Forked from [carla-rl-gym/carla-rl](https://github.com/carla-rl-gym/carla-rl). This project was done at Insight Data Science in January 2020 (20A.AI.SV). The goal is to reproduce results obtained by [seansegal](https://github.com/seansegal), analyze differences between algorithms and implement curriculum learning (CL). 
+Forked from [carla-rl-gym/carla-rl](https://github.com/carla-rl-gym/carla-rl). This project was done at Insight Data Science in January 2020 (20A.AI.SV, see [slide deck](bit.ly/curriculum-carla). The goal is to reproduce results obtained by [seansegal](https://github.com/seansegal), analyze differences between algorithms and implement curriculum learning (CL). 
 
 __Additions to the original repo__
 * Vanilla Policy Gradient algorithm (VPG) added for benchmarking
